@@ -28,6 +28,9 @@ public static class BookingErrors
     public static readonly Error AlreadyCancelled =
         new("AlreadyCancelled", "The booking is already cancelled.", ErrorType.Conflict);
 
+    public static readonly Error DailyLimitExceeded =
+        new("DailyLimitExceeded", "A participant cannot have more than 2 active bookings per day.", ErrorType.Conflict);
+
     public static readonly Error BookingNotFound =
         new("BookingNotFound", "The booking does not exist.", ErrorType.NotFound);
 }

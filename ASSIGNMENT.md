@@ -54,6 +54,10 @@ When the room does not exist, 404 is returned before any validation.
   Bookings that only touch (one ends exactly when the other starts) do not overlap.
 - **R8.** Cancelling moves a booking from `Active` to `Cancelled`. Cancelling an already
   cancelled booking gives 409. Cancelling a missing one gives 404. A cancelled booking frees its interval.
+- **R9.** A participant cannot have more than 2 active bookings per day, across all rooms together.
+  The day is the UTC date of `startUtc`. The third active booking on the same day, for the same
+  `bookedBy`, is rejected with 409. Cancelled bookings do not count. Bookings on different days
+  do not affect each other.
 
 ---
 

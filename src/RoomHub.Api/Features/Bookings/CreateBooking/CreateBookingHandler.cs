@@ -24,6 +24,12 @@ public sealed class CreateBookingHandler(
         var nowUtc = timeProvider.GetUtcNow().UtcDateTime;
         var existing = bookings.ListForRoom(command.RoomId);
 
+        var dailyForParticipant = !string.IsNullOrWhiteSpace(command.BookedBy)
+            ? bookings.ListActiveByBookedByOnDate(
+                command.BookedBy,
+                DateOnly.FromDateTime(command.StartUtc))
+            : new List<Booking>();
+
         var creation = Booking.Create(
             room,
             command.BookedBy,
@@ -31,7 +37,8 @@ public sealed class CreateBookingHandler(
             command.EndUtc,
             command.Attendees,
             nowUtc,
-            existing);
+            existing,
+            dailyForParticipant);
 
         if (creation.IsFailure)
             return Task.FromResult(Result<CreateBookingResponse>.Failure(creation.Error));

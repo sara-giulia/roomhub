@@ -47,7 +47,8 @@ public sealed class Booking
         DateTime endUtc,
         int attendees,
         DateTime nowUtc,
-        IEnumerable<Booking> existingForRoom)
+        IEnumerable<Booking> existingForRoom,
+        IEnumerable<Booking> existingForParticipantOnDay)
     {
         // R2
         if (string.IsNullOrWhiteSpace(bookedBy))
@@ -82,7 +83,25 @@ public sealed class Booking
                 return BookingErrors.RoomOccupied;
         }
 
-        return new Booking(Guid.NewGuid(), room.Id, bookedBy.Trim(), startUtc, endUtc, attendees);
+        // R9 - at most 2 active bookings per day per participant, across all rooms
+        var trimmedBookedBy = bookedBy.Trim();
+        var startDate = DateOnly.FromDateTime(startUtc);
+        var activeOnDay = 0;
+        foreach (var other in existingForParticipantOnDay)
+        {
+            if (other.Status != BookingStatus.Active)
+                continue;
+            if (other.BookedBy != trimmedBookedBy)
+                continue;
+            if (DateOnly.FromDateTime(other.StartUtc) != startDate)
+                continue;
+
+            activeOnDay++;
+            if (activeOnDay >= 2)
+                return BookingErrors.DailyLimitExceeded;
+        }
+
+        return new Booking(Guid.NewGuid(), room.Id, trimmedBookedBy, startUtc, endUtc, attendees);
     }
 
     // R8
