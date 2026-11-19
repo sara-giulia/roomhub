@@ -7,7 +7,9 @@ An unanswered question gives 0 points.
 ## 1. A rule you moved
 Pick one business rule (R1–R8). In which file did it live in the starter and in which file does it live now? Why there?
 
-_(your answer here)_
+Aleg R7. Era in Services/BookingService.cs, metoda Create linia 28, bucla foreach cu <=. Acum e in Domain/Bookings/Booking.cs, metoda Create.
+Am pus- o acolo pentru ca regula tine de rezervare deci sta in entitatea ei. Asa e intr-un singur loc si nu poate fi ocolita (constructorul e privat, deci orice Booking trece prin Create).
+Si acum endpoint-ul si handlerul nu mai contin reguli.
 
 ## 2. Result instead of an exception
 Why is `Result` a better choice than an exception for "the room is occupied"? What happens in your code when an `Error` is returned?

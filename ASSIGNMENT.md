@@ -58,6 +58,13 @@ When the room does not exist, 404 is returned before any validation.
   The day is the UTC date of `startUtc`. The third active booking on the same day, for the same
   `bookedBy`, is rejected with 409. Cancelled bookings do not count. Bookings on different days
   do not affect each other.
+- **R10.** Rooms with capacity strictly greater than 10 can be booked for at most 2 hours
+  (exactly 2 hours is allowed); a longer duration is rejected with 400. Rooms with capacity 10
+  or less keep the 4-hour limit from R6.
+- **R11.** A booking can be cancelled only if it starts at least 60 minutes from "now"
+  (exactly 60 minutes is allowed). "Now" comes from `TimeProvider`. If the start is closer than
+  that, cancellation is rejected with 409. Order in cancel: missing booking (404), already
+  cancelled (409 per R8), then R11.
 
 ---
 

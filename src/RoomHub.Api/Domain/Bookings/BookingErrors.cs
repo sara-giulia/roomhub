@@ -22,11 +22,17 @@ public static class BookingErrors
     public static readonly Error DurationTooLong =
         new("DurationTooLong", "The booking cannot exceed 4 hours.", ErrorType.Validation);
 
+    public static readonly Error LargeRoomDurationTooLong =
+        new("LargeRoomDurationTooLong", "Rooms with more than 10 seats cannot be booked for more than 2 hours.", ErrorType.Validation);
+
     public static readonly Error RoomOccupied =
         new("RoomOccupied", "The room is occupied in this interval.", ErrorType.Conflict);
 
     public static readonly Error AlreadyCancelled =
         new("AlreadyCancelled", "The booking is already cancelled.", ErrorType.Conflict);
+
+    public static readonly Error TooLateToCancel =
+        new("TooLateToCancel", "A booking can only be cancelled at least 60 minutes before it starts.", ErrorType.Conflict);
 
     public static readonly Error DailyLimitExceeded =
         new("DailyLimitExceeded", "A participant cannot have more than 2 active bookings per day.", ErrorType.Conflict);

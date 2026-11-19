@@ -2,32 +2,33 @@ using RoomHub.Api.Common;
 using RoomHub.Api.Domain.Bookings;
 using RoomHub.Api.Domain.Common;
 using RoomHub.Api.Domain.Rooms;
-using RoomHub.Api.Repositories;
 
 namespace RoomHub.Api.Features.Bookings.CreateBooking;
 
 public sealed class CreateBookingHandler(
-    RoomRepository rooms,
-    BookingRepository bookings,
+    IRoomRepository rooms,
+    IBookingRepository bookings,
+    IUnitOfWork uow,
     TimeProvider timeProvider)
     : ICommandHandler<CreateBookingCommand, CreateBookingResponse>
 {
-    public Task<Result<CreateBookingResponse>> Handle(
+    public async Task<Result<CreateBookingResponse>> Handle(
         CreateBookingCommand command,
         CancellationToken ct)
     {
         // 404 before any validation
-        var room = rooms.Get(command.RoomId);
+        var room = await rooms.GetAsync(command.RoomId, ct);
         if (room is null)
-            return Task.FromResult(Result<CreateBookingResponse>.Failure(RoomErrors.RoomNotFound));
+            return RoomErrors.RoomNotFound;
 
         var nowUtc = timeProvider.GetUtcNow().UtcDateTime;
-        var existing = bookings.ListForRoom(command.RoomId);
+        var existing = await bookings.ListForRoomAsync(command.RoomId, ct);
 
         var dailyForParticipant = !string.IsNullOrWhiteSpace(command.BookedBy)
-            ? bookings.ListActiveByBookedByOnDate(
+            ? await bookings.ListActiveByBookedByOnDateAsync(
                 command.BookedBy,
-                DateOnly.FromDateTime(command.StartUtc))
+                DateOnly.FromDateTime(command.StartUtc),
+                ct)
             : new List<Booking>();
 
         var creation = Booking.Create(
@@ -41,12 +42,12 @@ public sealed class CreateBookingHandler(
             dailyForParticipant);
 
         if (creation.IsFailure)
-            return Task.FromResult(Result<CreateBookingResponse>.Failure(creation.Error));
+            return creation.Error;
 
         var booking = creation.Value;
         bookings.Add(booking);
+        await uow.SaveChangesAsync(ct);
 
-        return Task.FromResult<Result<CreateBookingResponse>>(
-            new CreateBookingResponse(booking.Id, booking.RoomId, booking.Status.ToString()));
+        return new CreateBookingResponse(booking.Id, booking.RoomId, booking.Status.ToString());
     }
 }

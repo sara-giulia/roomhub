@@ -12,6 +12,8 @@ public enum BookingStatus
 public sealed class Booking
 {
     public static readonly TimeSpan MaxDuration = TimeSpan.FromHours(4);
+    public static readonly TimeSpan LargeRoomMaxDuration = TimeSpan.FromHours(2);
+    public static readonly TimeSpan MinCancelLeadTime = TimeSpan.FromMinutes(60);
 
     public Guid Id { get; private set; }
     public Guid RoomId { get; private set; }
@@ -73,6 +75,10 @@ public sealed class Booking
         if (endUtc - startUtc > MaxDuration)
             return BookingErrors.DurationTooLong;
 
+        // R10 - stricter cap for rooms with capacity > 10
+        if (room.Capacity > 10 && endUtc - startUtc > LargeRoomMaxDuration)
+            return BookingErrors.LargeRoomDurationTooLong;
+
         // R7 - only Active bookings count; touching intervals do not overlap
         foreach (var other in existingForRoom)
         {
@@ -104,11 +110,14 @@ public sealed class Booking
         return new Booking(Guid.NewGuid(), room.Id, trimmedBookedBy, startUtc, endUtc, attendees);
     }
 
-    // R8
-    public Result<Unit> Cancel()
+    // R8 + R11
+    public Result<Unit> Cancel(DateTime nowUtc)
     {
         if (Status == BookingStatus.Cancelled)
             return BookingErrors.AlreadyCancelled;
+
+        if (StartUtc - nowUtc < MinCancelLeadTime)
+            return BookingErrors.TooLateToCancel;
 
         Status = BookingStatus.Cancelled;
         return Unit.Value;
