@@ -1,22 +1,25 @@
+using System.Text.Json.Serialization;
+using RoomHub.Api.Common;
 using RoomHub.Api.Features.Bookings.CancelBooking;
 using RoomHub.Api.Features.Bookings.CreateBooking;
 using RoomHub.Api.Features.Bookings.GetBooking;
 using RoomHub.Api.Features.Rooms.CreateRoom;
 using RoomHub.Api.Features.Rooms.GetRoom;
-using RoomHub.Api.Middleware;
 using RoomHub.Api.Repositories;
-using RoomHub.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<RoomRepository>();
 builder.Services.AddSingleton<BookingRepository>();
-builder.Services.AddScoped<RoomService>();
-builder.Services.AddScoped<BookingService>();
+builder.Services.AddHandlers();
 
 var app = builder.Build();
-
-app.UseMiddleware<ExceptionMiddleware>();
 
 app.MapGet("/", () => "RoomHub API is running.");
 

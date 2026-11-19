@@ -5,4 +5,7 @@ Fill it in yourself, in your own words. There is no required number: what counts
 
 | Which rule from ASSIGNMENT.md is violated (R1–R8) | Where the problem was in the starter (file, approximate line) | How you discovered it (test, reading, AI) | What you changed |
 |---|---|---|---|
-| _(fill in)_ | _(fill in)_ | _(fill in)_ | _(fill in)_ |
+| R7 | Services/BookingService.cs, linia 28: <= | citind codul am vazut de repede greseala pentru ca semana cu ce facusem in curs | < strict |
+  | R7/R8 | Services/BookingService.cs, linia 26: ia si rezervarile anulate | tot citind codul | sa ia doar rezervarile Active |
+| R8 |  Services/BookingService.cs, liniile 56-60 : anulare dubla si da 209 | citind codul | returneaza 409 |
+

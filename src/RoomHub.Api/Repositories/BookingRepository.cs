@@ -1,8 +1,7 @@
-using RoomHub.Api.Models;
+using RoomHub.Api.Domain.Bookings;
 
 namespace RoomHub.Api.Repositories;
 
-// Starter: in-memory data. It is lost when the application restarts.
 public class BookingRepository
 {
     private readonly List<Booking> _bookings = new();
